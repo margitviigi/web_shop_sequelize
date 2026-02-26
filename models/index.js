@@ -1,0 +1,34 @@
+const path = require('path');
+const fs = require('fs');
+const sequelize = require('../util/db');
+const models = {};
+
+module.exports = (() => {
+    if (!Object.keys(models).length) {
+        const files = fs.readdirSync(__dirname);
+        const excludedFiles = ['.', '..', 'index.js'];
+
+        for (const file of files) {
+            if (!excludedFiles.includes(file) && (path.extname(file) === '.js')) {
+                const modelFile = require(path.join(__dirname, file));
+                models[modelFile.getTableName()] = modelFile;
+            }
+        }
+    Object
+    .values(models)
+    .forEach(model => {
+        if (typeof model.associate === 'function') {
+            model.associate(models);
+        }
+    });
+    models.sequelize = sequelize;
+    }
+
+    models.User = require('./user.js');
+    models.Product = require('./product.js');
+
+    models.User.hasMany(models.Product)
+    models.Product.belongsTo(models.User, {constraints: true, onDelete: 'CASCADE'});
+
+    return models;
+})();
