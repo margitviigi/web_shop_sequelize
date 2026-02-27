@@ -10,4 +10,5 @@ router.get('/product/:productId', (req, res) => {
     productController.getProductById(req, res);
 });
 
+
 module.exports = router;
