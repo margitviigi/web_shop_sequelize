@@ -22,4 +22,12 @@ router.post('/cart/delete-item', (req, res) => {
     shopController.removeProductFromCart(req, res);
 });
 
+router.post('/create-order', (req, res) => {
+    shopController.postOrder(req, res);
+});
+
+router.get('/orders', (req, res) => {
+    shopController.getOrders(req, res);
+});
+
 module.exports = router;

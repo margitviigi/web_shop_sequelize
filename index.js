@@ -29,7 +29,7 @@ const shopRoutes = require('./routes/shop');
 app.use(shopRoutes);
 
 sequelize
-.sync({ force: false })
+.sync({ alter: true })
 .then(() => {
   return models.User.findByPk(1);
 })
@@ -40,7 +40,13 @@ sequelize
   return user;
 })
 .then((user) => {
-  return user.createCart();
+  return user.getCart()
+  .then(cart => {
+    if (cart) {
+      return cart;
+    }
+    return user.createCart();
+  });
 })
 .then((cart) => {
   console.log(cart)
@@ -49,7 +55,6 @@ sequelize
 .catch(err => {
   console.error('Tabelite loomisel tekkis viga:', err);
 });
-
 
 
 

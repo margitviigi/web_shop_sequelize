@@ -90,7 +90,63 @@ class shopController {
             });
         }
     }
+
+    async postOrder(req, res) {
+        try {
+            const cart = await req.user.getCart();
+            const products = await cart.getProducts();
+
+            if (!products.length) {
+                return res.status(400).json({
+                    message: 'Cart is empty'
+                });
+            }
+
+            const order = await req.user.createOrder();
+            await order.addProducts(
+                products.map(product => {
+                    product.orderitem = { quantity: product.cartitem.quantity };
+                    return product;
+                })
+            );
+
+            await cart.setProducts([]);
+
+            return res.status(201).json({
+                message: 'Order created successfully',
+                orderId: order.id
+            });
+        } catch (error) {
+            return res.status(500).json({
+                message: 'Failed to create order',
+                error: error.message
+            });
+        }
+    }
+
+    async getOrders(req, res) {
+        try {
+            const orders = await req.user.getOrders();
+            const ordersWithProducts = await Promise.all(
+                orders.map(async order => {
+                    const products = await order.getProducts();
+                    return {
+                        id: order.id,
+                        products: products
+                    };
+                })
+            );
+
+            return res.status(200).json({
+                orders: ordersWithProducts
+            });
+        } catch (error) {
+            return res.status(500).json({
+                message: 'Failed to fetch orders',
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = new shopController();
-
